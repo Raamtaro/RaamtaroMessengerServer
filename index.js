@@ -8,6 +8,9 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { localStrategy } from "./config/passportLocalStrategy.js";
 import { jwtStrategy } from "./config/passportJwtStrategy.js";
 
+import router from './routes/index.js'
+
+
 const app = express()
 const port = 3000;
 const prisma = new PrismaClient()
@@ -50,6 +53,10 @@ passport.deserializeUser(async (id, done)=> {
 /**
  * ROUTES GO HERE
  */
+app.use('/user', router.user)
+app.use('/auth', router.auth)
+app.use('/conversation', router.conversation)
+app.use('/message', router.message)
 
 
 
