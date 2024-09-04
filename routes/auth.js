@@ -4,7 +4,6 @@ import authControl from "../controllers/authControl.js";
 
 const router = Router()
 
-
 router.post('/signup', authControl.userSignup)
 router.post('/login', authControl.loginUser)
 router.post('/logout', authControl.logoutUser)
