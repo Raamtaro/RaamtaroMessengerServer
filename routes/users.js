@@ -6,8 +6,8 @@ import userControl from "../controllers/userControl.js";
 const router = Router()
 
 router.get('/users', passport.authenticate('jwt', {session: false}), userControl.getUsers)
-// router.get()
-// router.put()
-// router.delete()
+router.get('/:id', passport.authenticate('jwt', {session: false}), userControl.getUser)
+router.put('/:id', passport.authenticate('jwt', {session: false}), userControl.updateUser)
+router.delete('/:id', passport.authenticate('jwt', {session: false}), userControl.deleteUser)
 
 export default router
