@@ -10,6 +10,7 @@ import { jwtStrategy } from "./config/passportJwtStrategy.js";
 
 import router from './routes/index.js'
 
+configDotenv()
 
 const app = express()
 const port = 3000;

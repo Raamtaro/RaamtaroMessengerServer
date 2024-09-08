@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import { configDotenv } from "dotenv";
 
 import { validationResult } from "express-validator";
-import expressAsyncHandler from "express-async-handler";
+
 
 configDotenv();
 
