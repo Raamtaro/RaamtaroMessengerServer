@@ -57,11 +57,13 @@ const getUser = asyncHandler( async(req, res) => {
 
 })
 
-const updateUserPassword = asyncHandler( async(req, res) => { //Moving this to the auth route
+const updateUserPassword = asyncHandler( async(req, res) => { //Moving this to the auth route eventually.
 
-    const client = req.user //In this case, we don't want the client to be able to update another user's password
+    //Come back to this a bit later
+
+    // const client = req.user 
     const id = parseInt(req.params.id)
-    const {currentPassword, newPassword} = req.body
+    const {email, currentPassword, newPassword} = req.body
 
     //If I think about the user flow for this...
     //1. user clicks on a link to request password reset
