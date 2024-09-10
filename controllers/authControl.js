@@ -17,7 +17,7 @@ const userSignup = asyncHandler( async (req, res) => {
     const {email, password, name} = req.body
     //if they haven't submitted the fields, then throw an error
     if (!email || !password || !name) {
-        return res.status(400).json({feedback: "Please include email, password and name"})
+        return res.status(400).json({error: "Please include email, password and name"})
     }
 
     //Is there an existing user?
@@ -29,7 +29,7 @@ const userSignup = asyncHandler( async (req, res) => {
         }
     )
     if (existingUser) {
-        return res.status(400).json({feedback: `account with email: ${email} already exists.`})
+        return res.status(400).json({error: `account with email: ${email} already exists.`})
     }
 
     
