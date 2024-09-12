@@ -39,6 +39,7 @@ model Conversation {
   author User @relation("author", fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int
   participants User[] @relation("participants")
+  messages Message[]
 
 
 }
@@ -52,6 +53,9 @@ model Message {
   //relationships
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId Int
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId Int
 }
 
 model Profile {
