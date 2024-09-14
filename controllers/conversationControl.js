@@ -10,7 +10,17 @@ const getConversations = asyncHandler( async (req, res) => {
     /**
      * Likely just something that will be useful. Since I'm returning every conersation in the db, I'll omit the messages since this will be every conversation. maybe just conversations and titles
      */
-    const allConversations = await prisma.conversation.findMany()
+    const allConversations = await prisma.conversation.findMany(
+        {
+            select: {
+                participants: true,
+                messages: true,
+                id: true,
+                authorId: true,
+                title: true
+            }
+        }
+    )
     res.status(200).json({
         allConversations
     })
@@ -51,7 +61,52 @@ const createConversation = asyncHandler( async (req, res) => {
 
 })
 
-const updateConversation = asyncHandler( async (req, res) => { 
+const updateConversation = asyncHandler( async (req, res) => { //Add participant to the conversation or change the title
+    //Only the author should be able to add a participant to a conversation, so we need the client
+
+    const client = req.user
+    const {title, participants} = req.body
+    const conversationId = parseInt(req.params.id)
+    const updateData = {}
+
+    //To work optimally with Prisma, the participants should be included in the following format:
+
+    /**
+     *  participants = {participants: {set: [{id: 2}, ... ]}}
+     * 
+     * From the client, the request may look something like:
+     * 
+     * fetch(updateEndpoint, {
+     *  method: "PUT"
+     *  headers: {content-type, Auth}
+     *  body: {
+     *     
+     *     title: title
+     *     participants
+     *  }
+     * })
+     */
+
+    const conversation = await prisma.conversation.findUnique(
+        {
+            where: {
+                id: conversationId
+            }
+        }
+    )
+
+    //If that doesn't fail, then conversation exists
+
+    if (conversation.authorId !== client.id) {
+        return res.status(403).json(
+            {
+                error: "Unauthorized: Author only action"
+            }
+        )
+    }
+
+
+
     
 })
 
