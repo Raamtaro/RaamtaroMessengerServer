@@ -13,11 +13,18 @@ const getConversations = asyncHandler( async (req, res) => {
     const allConversations = await prisma.conversation.findMany(
         {
             select: {
-                participants: true,
-                messages: true,
                 id: true,
                 authorId: true,
-                title: true
+                title: true,
+                participants: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                    }
+                },
+                messages: true,
+
             }
         }
     )
@@ -87,7 +94,7 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
      * })
      */
 
-    const conversation = await prisma.conversation.findUnique(
+    const conversation = await prisma.conversation.findUnique( //since getConversation also uses this, I'm going to create a helper function for it
         {
             where: {
                 id: conversationId
@@ -105,9 +112,29 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
         )
     }
 
-
-
+    //Data Prep
+    if (title) updateData.title = title
+    if (participants) updateData.participants = participants
     
+
+
+    //I can add multiple participants at a time with prisma, and so I don't need to manually implement the promise.all() condition.
+    const updatedConversation = await prisma.conversation.update(
+        {
+            where: {
+                id: conversationId
+            },
+            data: {
+                ...updateData
+            }
+        }
+    )
+    res.status(200).json(
+        {
+            message: "Successfully updated conversation",
+            updatedConversation
+        }
+    )
 })
 
 const deleteConversation = asyncHandler( async (req, res) => {

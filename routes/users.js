@@ -7,6 +7,7 @@ const router = Router()
 
 router.get('/users', passport.authenticate('jwt', {session: false}), userControl.getUsers)
 router.get('/:id', passport.authenticate('jwt', {session: false}), userControl.getUser)
+router.get('/search', passport.authenticate('jwt', {session: false}, userControl.getOtherUsers))
 // router.put('/:id', passport.authenticate('jwt', {session: false}), userControl.updateUserPassword)
 router.delete('/:id', passport.authenticate('jwt', {session: false}), userControl.deleteUser)
 

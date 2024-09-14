@@ -57,6 +57,30 @@ const getUser = asyncHandler( async(req, res) => {
 
 })
 
+const getOtherUsers = asyncHandler( async(req, res) => { //For search functionality - we typically wouldn't want the Logged-in user to search for themselves.
+    const client = req.user
+    const allUsers = await prisma.user.findMany(
+        {
+            where: {
+                id: {not: client.id}
+            },
+
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                
+            }
+        }
+    )
+
+    res.status(200).json(
+        {
+            allUsers
+        }
+    )
+})
+
 const updateUserPassword = asyncHandler( async(req, res) => { //Moving this to the auth route eventually.
 
     //Come back to this a bit later
@@ -117,6 +141,7 @@ const deleteUser = asyncHandler( async(req, res) => {
 export default {
     getUsers,
     getUser,
+    getOtherUsers,
     updateUserPassword,
     deleteUser
 }
