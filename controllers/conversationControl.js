@@ -40,12 +40,53 @@ const getUserConversations = asyncHandler( async (req, res) => {
      * This will return ALL conversations associated with the user
      */
 
+    const client = req.user
+
+    const userConversations = await prisma.conversation.findMany(
+        {
+            where: {
+                OR: [
+                        {
+                            authorId: client.id
+                        },
+                        {
+                            participants: {
+                                some: {
+                                    id: client.id
+                                }
+                            }
+                        }
+                ]
+            }
+        }
+    )
+    res.status(200).json(
+        {
+            userConversations
+        }
+    )
+
 
 
 })
 
 const getConversation = asyncHandler( async (req, res) => {
-    
+    // const client = req.user //Might use later
+    const id = parseInt(req.params.id)
+
+    const conversation = await prisma.conversation.findUnique(
+        {
+            where: {
+                id: id
+            }
+        }
+    )
+
+    res.status(200).json(
+        {
+            conversation
+        }
+    )
 })
 
 const createConversation = asyncHandler( async (req, res) => {
@@ -114,15 +155,6 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
         }
     }
 
-    //Need to convert the id values from participants into strings
-    //participants --> set --> [Array of {objects --> "id": "5"}]
-
-    // updateData.participants.set.forEach(
-    //     (object) => {
-    //         object.id = parseInt(object.id)
-    //     }
-    // )
-
     
     /**
      * Start update Request
@@ -146,7 +178,39 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
 })
 
 const deleteConversation = asyncHandler( async (req, res) => {
-    
+    const client = req.user
+    const id = parseInt(req.params.id)
+
+    const conversation = await prisma.conversation.findUnique(
+        {
+            where: {
+                id: id
+            }
+        }
+    )
+
+    if (conversation.authorId !== client.id) {
+        return res.status(403).json(
+            {
+                error: "Unauthorized request"
+            }
+        )
+    }
+
+    //else, we can go ahead and delete it 
+    await prisma.conversation.delete(
+        {
+            where: {
+                id: id
+            }
+        }
+    )
+
+    res.status(204).json(
+        {
+            message: "Conversation successfully deleted"
+        }
+    )
 })
 
 export default {

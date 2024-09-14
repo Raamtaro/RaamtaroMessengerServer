@@ -6,6 +6,7 @@ import conversationControl from "../controllers/conversationControl.js";
 const router = Router()
 
 router.get('/conversations', passport.authenticate('jwt', {session: false}), conversationControl.getConversations)
+router.get('/conversations/mine', passport.authenticate('jwt', {session: false}), conversationControl.getUserConversations)
 router.get('/:id', passport.authenticate('jwt', {session: false}), conversationControl.getConversation)
 router.post('/create', passport.authenticate('jwt', {session: false}), conversationControl.createConversation)
 router.put('/:id', passport.authenticate('jwt', {session: false}), conversationControl.updateConversation)
