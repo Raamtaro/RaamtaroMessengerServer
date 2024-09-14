@@ -76,22 +76,8 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
     const conversationId = parseInt(req.params.id)
     const updateData = {}
 
-    //To work optimally with Prisma, the participants should be included in the following format:
-
     /**
      *  participants = {participants: {set: [{id: 2}, ... ]}}
-     * 
-     * From the client, the request may look something like:
-     * 
-     * fetch(updateEndpoint, {
-     *  method: "PUT"
-     *  headers: {content-type, Auth}
-     *  body: {
-     *     
-     *     title: title
-     *     participants
-     *  }
-     * })
      */
 
     const conversation = await prisma.conversation.findUnique( //since getConversation also uses this, I'm going to create a helper function for it
@@ -116,24 +102,31 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
      * Data Prep
      */
     if (title) updateData.title = title
-    if (participants) updateData.participants = participants
+    if (participants) {
+        updateData.participants = {
+            connect: participants.connect.map(
+                (participant) => (
+                    {
+                        id: parseInt(participant.id)
+                    }
+                )
+            )
+        }
+    }
 
     //Need to convert the id values from participants into strings
     //participants --> set --> [Array of {objects --> "id": "5"}]
 
-    updateData.participants.set.forEach(
-        (object) => {
-            object.id = parseInt(object.id)
-        }
-    )
+    // updateData.participants.set.forEach(
+    //     (object) => {
+    //         object.id = parseInt(object.id)
+    //     }
+    // )
 
     
-
-    
-    
-
-
-    //I can add multiple participants at a time with prisma, and so I don't need to manually implement the promise.all() condition.
+    /**
+     * Start update Request
+     */
     const updatedConversation = await prisma.conversation.update(
         {
             where: {
