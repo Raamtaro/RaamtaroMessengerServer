@@ -125,7 +125,7 @@ const updateConversation = asyncHandler( async (req, res) => { //Add participant
                 id: conversationId
             },
             data: {
-                ...updateData
+                ...updateData //I have a feeling that I'm going to need to modify this at some point, or prep the data quite a bit more closely. I'm not exactly sure how/if prisma intelligently uses `parseInt()` on the id fields. We shall see.
             }
         }
     )
