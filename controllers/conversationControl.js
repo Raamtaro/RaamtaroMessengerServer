@@ -189,6 +189,14 @@ const deleteConversation = asyncHandler( async (req, res) => {
         }
     )
 
+    if (!conversation) {
+        return res.status(404).json(
+            {
+                error: "Resource not found."
+            }
+        )
+    }
+
     if (conversation.authorId !== client.id) {
         return res.status(403).json(
             {
@@ -206,7 +214,7 @@ const deleteConversation = asyncHandler( async (req, res) => {
         }
     )
 
-    res.status(204).json(
+    res.status(200).json(
         {
             message: "Conversation successfully deleted"
         }
