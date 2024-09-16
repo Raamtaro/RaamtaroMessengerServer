@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import { PrismaClient } from "@prisma/client";
+import { fetchConversation, userInConversation } from "../utils/utils.js";
 
 import { validationResult } from "express-validator";
 
@@ -67,19 +68,6 @@ const getMessage = asyncHandler( async(req, res) => {
             where: {
                 id: messageId
             },
-            /**
-             * Leaving for now, but will delete later as I'm 99% sure that this is what shows up by default anyway.
-             */
-            // select: {
-            //     id: true,
-            //     authorId: true,
-            //     conversationId: true,
-
-            //     createdAt: true,
-            //     updatedAt: true,
-
-            //     body: true
-            // }
         }
     )
 
@@ -97,6 +85,27 @@ const createMessage = asyncHandler( async(req, res) => {
     const client = req.user
     const conversationId = parseInt(req.params.id)
     const {body} = req.body
+
+    //This logic needs to be reworked - currently does not account for a user trying to create a message inside of a conversation in which they are neither a participant nor the author
+
+    //Rewriting to utilize the utils function
+    const conversation = await fetchConversation(conversationId)
+
+    if (conversation.authorId !== client.id) { //First check if the client is the author
+        //Next, perform a check to see if the author is a participant
+        const verifiedParticipant = userInConversation(conversation.participants, 0, client.id)
+        if (!verifiedParticipant) {
+            return res.status(403).json(
+                {
+                    error: "Permission denied"
+                }
+            )
+        }
+        //else, we can keep going
+    }
+
+    
+
 
 
     const message = await prisma.message.create(

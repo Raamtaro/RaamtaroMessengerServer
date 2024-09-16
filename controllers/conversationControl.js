@@ -5,6 +5,8 @@ import { validationResult } from "express-validator";
 
 const prisma = new PrismaClient()
 
+
+
 const getConversations = asyncHandler( async (req, res) => {
 
     /**
@@ -78,7 +80,19 @@ const getConversation = asyncHandler( async (req, res) => {
         {
             where: {
                 id: id
+            },
+            select: {
+                id: true,
+                authorId: true,
+                participants: {
+                    select: {
+                        id: true,
+                        name: true,
+                    }
+                },
+                messages: true,
             }
+
         }
     )
 
