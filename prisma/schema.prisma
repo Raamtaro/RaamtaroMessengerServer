@@ -69,7 +69,7 @@ model Profile {
 
   //relationships
   owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId Int
+  ownerId Int @unique
 
   
 }
