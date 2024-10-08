@@ -8,6 +8,10 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { localStrategy } from "./config/passportLocalStrategy.js";
 import { jwtStrategy } from "./config/passportJwtStrategy.js";
 
+import http from 'http'
+import cors from 'cors'
+import { Server } from "socket.io";
+
 import router from './routes/index.js'
 
 configDotenv()
@@ -15,6 +19,8 @@ configDotenv()
 const app = express()
 const port = 3000;
 const prisma = new PrismaClient()
+
+app.use(cors())
 
 app.use(express.json())
 app.use(express.urlencoded({extended: true}))
@@ -61,6 +67,22 @@ app.use('/message', router.message)
 app.use('/profile', router.profile)
 
 
+/**
+ * Web Socket stuff
+ */
+
+const server = http.createServer(app)
+
+const io = new Server(server, 
+    {
+        cors: {
+            origin: 'http://localhost:3000',
+            methods: ['GET', 'POST'],
+        }
+    }
+)
+
+
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
@@ -70,3 +92,5 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     console.log(`listening on port: ${port}`)
 })
+
+export default {io}
