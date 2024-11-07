@@ -7,9 +7,6 @@ import { validationResult } from "express-validator";
 const prisma = new PrismaClient()
 
 const getMessages = asyncHandler( async(req, res) => {
-    /**
-     * Get all Messages
-     */
 
     const allMessages = await prisma.message.findMany(
         {
@@ -31,9 +28,7 @@ const getMessages = asyncHandler( async(req, res) => {
 })
 
 const getMyMessages = asyncHandler( async(req, res) => {
-    /**
-     * Get all Messages that have been written by the logged-in user
-     */
+
     const client = req.user
     const myMessages = await prisma.message.findMany(
         {
@@ -57,9 +52,7 @@ const getMyMessages = asyncHandler( async(req, res) => {
 })
 
 const getMessage = asyncHandler( async(req, res) => {
-    /**
-     * Retrieve a single message
-     */
+
     const client = req.user
     const messageId = parseInt(req.params.id)
 
@@ -78,62 +71,8 @@ const getMessage = asyncHandler( async(req, res) => {
     )
 })
 
-const createMessage = asyncHandler( async(req, res) => {
-    /**
-     * Write a message
-     */
-    const client = req.user
-    const conversationId = parseInt(req.params.id)
-    const {body} = req.body
-
-    const conversation = await fetchConversation(conversationId)
-
-    if (conversation.authorId !== client.id) { 
-        
-        const verifiedParticipant = userInConversation(conversation.participants, 0, client.id)
-        if (!verifiedParticipant) {
-            return res.status(403).json(
-                {
-                    error: "Permission denied"
-                }
-            )
-        }
-        
-    }
-
-    const message = await prisma.message.create(
-        {
-            data: {
-                body: body,
-                author: {connect: {id: client.id}},
-                conversation: {connect: {id: conversationId}}
-            }
-        }
-    )
-    res.status(201).json(
-        {
-            message
-        }
-    )
-})
-
 const addMessage = asyncHandler( async(req, res)=> {
-    /**
-     * This is an updated version of the createMessage handler
-     * 
-     * Will utilize the $transaction API 
-     * -- This is because the Conversation model needs to be updated when a message is added so that it can be retrieved/displayed properly in the Client without having to sort when retrieved
-     * So:
-     * 
-     * 1. Message created
-     * 2. Conversation lastMessageAt field is updated
-     * 
-     * And Conversation Controller for getUserConversations will be updated to orderBy the lastMessageAt field (or the updatedAt field).
-     */
 
-    /**
-     * Write a message (initial check is the same)
-     */
     const client = req.user
     const conversationId = parseInt(req.params.id)
     const {body} = req.body
@@ -184,10 +123,7 @@ const addMessage = asyncHandler( async(req, res)=> {
 })
 
 const editMessage = asyncHandler( async(req, res) => {
-    /**
-     * Edit Message
-     */
-    //Only author can edit the conversation
+
     const client = req.user
     const id = parseInt(req.params.id)
     const {body} = req.body
@@ -245,13 +181,10 @@ const editMessage = asyncHandler( async(req, res) => {
 })
 
 const deleteMessage = asyncHandler( async(req, res) => {
-    /**
-     * Delete Message
-     */
+
     const client = req.user
     const id = parseInt(req.params.id)
 
-    //Get the Message first
     const message = await prisma.message.findUnique(
         {
             where: {
@@ -260,7 +193,6 @@ const deleteMessage = asyncHandler( async(req, res) => {
         }
     )
 
-    //Is there a message to delete?
     if (!message) {
         return res.status(404).json(
             {
@@ -269,7 +201,6 @@ const deleteMessage = asyncHandler( async(req, res) => {
         )
     }
 
-    //Check if it belongs to the user
     if (message.authorId !== client.id) {
         return res.status(403).json(
             {
@@ -278,7 +209,6 @@ const deleteMessage = asyncHandler( async(req, res) => {
         )
     }
 
-    //Go ahead
     await prisma.message.delete(
         {
             where: {
@@ -298,7 +228,6 @@ export default {
     getMessages,
     getMyMessages,
     getMessage,
-    createMessage,
     addMessage,
     editMessage,
     deleteMessage
