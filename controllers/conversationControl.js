@@ -94,7 +94,11 @@ const getConversation = asyncHandler( async (req, res) => {
                         name: true,
                     }
                 },
-                messages: true,
+                messages: {
+                    orderBy: {
+                        createdAt: 'asc'
+                    }
+                },
             }
 
         }
