@@ -33,6 +33,7 @@ model Conversation {
   id Int @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
+  lastMessageAt DateTime? 
   title String?
 
   //relationships

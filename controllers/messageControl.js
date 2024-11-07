@@ -86,13 +86,10 @@ const createMessage = asyncHandler( async(req, res) => {
     const conversationId = parseInt(req.params.id)
     const {body} = req.body
 
-    //This logic needs to be reworked - currently does not account for a user trying to create a message inside of a conversation in which they are neither a participant nor the author
-
-    //Rewriting to utilize the utils function
     const conversation = await fetchConversation(conversationId)
 
-    if (conversation.authorId !== client.id) { //First check if the client is the author
-        //Next, perform a check to see if the author is a participant
+    if (conversation.authorId !== client.id) { 
+        
         const verifiedParticipant = userInConversation(conversation.participants, 0, client.id)
         if (!verifiedParticipant) {
             return res.status(403).json(
@@ -101,12 +98,8 @@ const createMessage = asyncHandler( async(req, res) => {
                 }
             )
         }
-        //else, we can keep going
+        
     }
-
-    
-
-
 
     const message = await prisma.message.create(
         {
@@ -120,6 +113,72 @@ const createMessage = asyncHandler( async(req, res) => {
     res.status(201).json(
         {
             message
+        }
+    )
+})
+
+const addMessage = asyncHandler( async(req, res)=> {
+    /**
+     * This is an updated version of the createMessage handler
+     * 
+     * Will utilize the $transaction API 
+     * -- This is because the Conversation model needs to be updated when a message is added so that it can be retrieved/displayed properly in the Client without having to sort when retrieved
+     * So:
+     * 
+     * 1. Message created
+     * 2. Conversation lastMessageAt field is updated
+     * 
+     * And Conversation Controller for getUserConversations will be updated to orderBy the lastMessageAt field (or the updatedAt field).
+     */
+
+    /**
+     * Write a message (initial check is the same)
+     */
+    const client = req.user
+    const conversationId = parseInt(req.params.id)
+    const {body} = req.body
+
+    const conversation = await fetchConversation(conversationId)
+
+    if (conversation.authorId !== client.id) { 
+        const verifiedParticipant = userInConversation(conversation.participants, 0, client.id)
+        if (!verifiedParticipant) {
+            return res.status(403).json(
+                {
+                    error: "Permission denied"
+                }
+            )
+        }
+    }
+
+    const [message, updatedConversation] = await prisma.$transaction(
+        [
+            prisma.message.create(
+                {
+                    data: {
+                        body: body,
+                        author: {connect: {id: client.id}},
+                        conversation: {connect: {id: conversationId}}
+                    }
+                }
+            ),
+            prisma.conversation.update(
+                {
+                    where: {
+                        id: conversationId
+                    },
+                    data: {
+                        lastMessageAt: new Date()
+                    }
+                }
+            )
+        ]
+    )
+
+    res.status(201).json(
+        {
+            message,
+            updatedConversation
         }
     )
 })
@@ -240,6 +299,7 @@ export default {
     getMyMessages,
     getMessage,
     createMessage,
+    addMessage,
     editMessage,
     deleteMessage
 }

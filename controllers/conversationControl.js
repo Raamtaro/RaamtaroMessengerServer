@@ -59,6 +59,9 @@ const getUserConversations = asyncHandler( async (req, res) => {
                             }
                         }
                 ]
+            },
+            orderBy: {
+                lastMessageAt: 'desc'
             }
         }
     )
@@ -67,13 +70,14 @@ const getUserConversations = asyncHandler( async (req, res) => {
             userConversations
         }
     )
-
-
-
 })
 
 const getConversation = asyncHandler( async (req, res) => {
     // const client = req.user //Might use later
+    /**
+     * When we get a single conversation, it is most likely to be in the context of pulling up the conversation for viewing.
+     * Therefore, the order in which Messages within said conversation are retrieved is incredibly crucial.
+     */
     const id = parseInt(req.params.id)
 
     const conversation = await prisma.conversation.findUnique(
