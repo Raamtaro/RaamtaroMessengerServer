@@ -53,7 +53,7 @@ const getUserConversations = asyncHandler( async (req, res) => {
                 ]
             },
             orderBy: {
-                lastMessageAt: 'desc'
+                lastMessageAt: {sort: 'desc', nulls: 'last'}
             }
         }
     )
@@ -113,7 +113,11 @@ const createConversation = asyncHandler( async (req, res) => {
             },
         }
     )
-    res.status(201).json({newConversation})
+    res.status(201).json(
+        {
+            newConversation
+        }
+    )
 
 
 })
