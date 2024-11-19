@@ -8,15 +8,27 @@ import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { localStrategy } from "./config/passportLocalStrategy.js";
 import { jwtStrategy } from "./config/passportJwtStrategy.js";
 
-import http from 'http'
+
 import cors from 'cors'
 import { Server } from "socket.io";
+import { createServer } from 'node:http';
 
 import router from './routes/index.js'
+
 
 configDotenv()
 
 const app = express()
+const server = createServer(app)
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173', //I'm going to have to add an environmental variable for this particular argument so that I properly point it to the hosted Client when it is put up on Netlify
+        methods: ['GET', 'POST']
+    }
+})
+
+
+
 const port = 3000;
 const prisma = new PrismaClient()
 
@@ -66,21 +78,25 @@ app.use('/conversation', router.conversation)
 app.use('/message', router.message)
 app.use('/profile', router.profile)
 
+io.on('connection', (socket)=> {
+    console.log('A user connected')
+})
 
-/**
- * Web Socket stuff
- */
 
-const server = http.createServer(app)
+// /**
+//  * Web Socket stuff
+//  */
 
-const io = new Server(server, 
-    {
-        cors: {
-            origin: 'http://localhost:3000',
-            methods: ['GET', 'POST'],
-        }
-    }
-)
+// const server = http.createServer(app)
+
+// const io = new Server(server, 
+//     {
+//         cors: {
+//             origin: 'http://localhost:3000',
+//             methods: ['GET', 'POST'],
+//         }
+//     }
+// )
 
 
 
@@ -89,8 +105,10 @@ app.use((err, req, res, next) => {
     res.status(500).send("Something Broke!")
 })
 
-app.listen(port, () => {
+// app.listen(port, () => {
+//     console.log(`listening on port: ${port}`)
+// })
+
+server.listen(port, () => {
     console.log(`listening on port: ${port}`)
 })
-
-export default {io}

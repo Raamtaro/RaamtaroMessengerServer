@@ -74,6 +74,7 @@ const getConversation = asyncHandler( async (req, res) => {
                 id: id
             },
             select: {
+                title: true,
                 id: true,
                 authorId: true,
                 participants: {

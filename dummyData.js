@@ -68,7 +68,7 @@ const populateDummyData = async () => {
                     const messageBody = `Dummy message numero ${i} from user with token ${token}`
 
                     messagePromises.push(
-                        limit(() => sendMessage(token, conversation.id, messageBody))
+                        limit(() => sendMessage(token, conversation.id, messageBody)) //Need to include the pLimit library and this line otherwise the socket closes with an EPIPE error because it gets overwhelmed.
                     )
                 }
             }
