@@ -78,25 +78,16 @@ app.use('/conversation', router.conversation)
 app.use('/message', router.message)
 app.use('/profile', router.profile)
 
+
+/**
+ * Socket logic
+ */
 io.on('connection', (socket)=> {
     console.log('A user connected')
+    socket.on('disconnect', ()=> {
+        console.log('User disconnected')
+    })
 })
-
-
-// /**
-//  * Web Socket stuff
-//  */
-
-// const server = http.createServer(app)
-
-// const io = new Server(server, 
-//     {
-//         cors: {
-//             origin: 'http://localhost:3000',
-//             methods: ['GET', 'POST'],
-//         }
-//     }
-// )
 
 
 
@@ -104,10 +95,6 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send("Something Broke!")
 })
-
-// app.listen(port, () => {
-//     console.log(`listening on port: ${port}`)
-// })
 
 server.listen(port, () => {
     console.log(`listening on port: ${port}`)

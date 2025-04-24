@@ -171,7 +171,7 @@ const editMessage = asyncHandler( async(req, res) => {
         }
     )
 
-    res.status(200).status(
+    res.status(200).json(
         {
             updatedMessage
         }
